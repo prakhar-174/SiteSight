@@ -2,11 +2,11 @@
 // WHY "use client": This component uses the animated Gauge component and Framer Motion 
 // for scroll animations, which both require client-side execution in Next.js App Router.
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Gauge } from '../ui/Gauge';
 import { ScoreCard } from '../ui/ScoreCard';
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" } }
 };

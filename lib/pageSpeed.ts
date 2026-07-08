@@ -92,8 +92,9 @@ export async function getPageSpeedData(url: string): Promise<{ performance: Perf
       }
     }
 
-  } catch (error: any) {
-    console.error('PageSpeed API Error:', error.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('PageSpeed API Error:', msg);
     auditItems.push({
       status: 'fail',
       label: 'Performance Analysis',

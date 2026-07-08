@@ -9,7 +9,7 @@ import * as cheerio from 'cheerio';
  * @returns A ContentAnalysis object and structured audit items.
  */
 export function analyzeContent(
-  $: cheerio.CheerioAPI,
+  $: ReturnType<typeof cheerio.load>,
   headings: HeadingAnalysis
 ): { content: ContentAnalysis, auditItems: AuditItem[] } {
   const auditItems: AuditItem[] = [];

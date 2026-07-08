@@ -7,7 +7,7 @@ import * as cheerio from 'cheerio';
  * @param $ - The loaded Cheerio instance representing the parsed HTML.
  * @returns An ImageAnalysis object containing total count, missing alt count, and structured audit items.
  */
-export function analyzeImages($: cheerio.CheerioAPI): { images: ImageAnalysis, auditItems: AuditItem[] } {
+export function analyzeImages($: ReturnType<typeof cheerio.load>): { images: ImageAnalysis, auditItems: AuditItem[] } {
   const auditItems: AuditItem[] = [];
   const images: ImageAnalysis = {
     totalImages: 0,

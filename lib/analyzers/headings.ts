@@ -7,7 +7,7 @@ import * as cheerio from 'cheerio';
  * @param $ - The loaded Cheerio instance representing the parsed HTML.
  * @returns A HeadingAnalysis object containing counts, hierarchy validity, and structured audit items.
  */
-export function analyzeHeadings($: cheerio.CheerioAPI): { headings: HeadingAnalysis, auditItems: AuditItem[] } {
+export function analyzeHeadings($: ReturnType<typeof cheerio.load>): { headings: HeadingAnalysis, auditItems: AuditItem[] } {
   const auditItems: AuditItem[] = [];
   const headings: HeadingAnalysis = {
     h1Count: 0,
@@ -23,7 +23,8 @@ export function analyzeHeadings($: cheerio.CheerioAPI): { headings: HeadingAnaly
   let h2BeforeH1 = false;
 
   headingElements.each((_, el) => {
-    const tagName = el.tagName.toLowerCase();
+    if (el.type !== 'tag') return;
+    const tagName = (el as { tagName: string }).tagName.toLowerCase();
     const level = parseInt(tagName.replace('h', ''), 10);
 
     if (level === 1) h1Count++;

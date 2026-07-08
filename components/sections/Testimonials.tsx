@@ -2,9 +2,9 @@
 // WHY "use client": This component uses Framer Motion for scroll animations, 
 // which requires client-side execution in Next.js App Router.
 
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" } }
 };
@@ -27,7 +27,7 @@ export function Testimonials() {
           
           <div className="rounded-[2rem] border-2 border-[var(--color-border)] bg-[var(--color-canvas)] p-8 md:p-10 flex flex-col justify-between hover:-translate-y-1 transition-transform">
             <p className="text-xl md:text-2xl font-medium text-[var(--color-text-primary)] mb-8 leading-relaxed">
-              "Fixed our title tags in 10 minutes. The breakdown was so clear we could assign tickets immediately."
+              &ldquo;Fixed our title tags in 10 minutes. The breakdown was so clear we could assign tickets immediately.&rdquo;
             </p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[var(--color-accent)] border-2 border-[var(--color-border)] flex items-center justify-center shrink-0">
@@ -42,7 +42,7 @@ export function Testimonials() {
 
           <div className="rounded-[2rem] border-2 border-[var(--color-border)] bg-[var(--color-canvas)] p-8 md:p-10 flex flex-col justify-between hover:-translate-y-1 transition-transform">
             <p className="text-xl md:text-2xl font-medium text-[var(--color-text-primary)] mb-8 leading-relaxed">
-              "Finally understand why we rank low. The performance metrics completely exposed our massive unoptimized images."
+              &ldquo;Finally understand why we rank low. The performance metrics completely exposed our massive unoptimized images.&rdquo;
             </p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[var(--color-warn)] border-2 border-[var(--color-border)] flex items-center justify-center shrink-0">

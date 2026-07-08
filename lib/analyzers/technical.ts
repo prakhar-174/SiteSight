@@ -12,7 +12,7 @@ import * as cheerio from 'cheerio';
  * @returns A promise that resolves to TechnicalAnalysis and structured audit items.
  */
 export async function analyzeTechnical(
-  $: cheerio.CheerioAPI, 
+  $: ReturnType<typeof cheerio.load>, 
   url: string, 
   finalUrl: string
 ): Promise<{ technical: TechnicalAnalysis, auditItems: AuditItem[] }> {
@@ -30,7 +30,7 @@ export async function analyzeTechnical(
     const parsedFinalUrl = new URL(finalUrl);
     origin = parsedFinalUrl.origin;
     technical.https = parsedFinalUrl.protocol === 'https:';
-  } catch (error) {
+  } catch (_e) {
     technical.https = false;
   }
 
@@ -45,8 +45,7 @@ export async function analyzeTechnical(
   try {
     const robotsRes = await axios.get(`${origin}/robots.txt`, { timeout: 3000 });
     technical.robotsTxt = robotsRes.status === 200;
-  } catch (error) {
-    technical.robotsTxt = false;
+  } catch (_e) {
   }
 
   if (technical.robotsTxt) {
@@ -59,8 +58,7 @@ export async function analyzeTechnical(
   try {
     const sitemapRes = await axios.get(`${origin}/sitemap.xml`, { timeout: 3000 });
     technical.sitemap = sitemapRes.status === 200;
-  } catch (error) {
-    technical.sitemap = false;
+  } catch (_e) {
   }
 
   if (technical.sitemap) {

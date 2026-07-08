@@ -4,11 +4,13 @@
 // all of which require client-side execution in Next.js App Router.
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useAnalysis } from '../../hooks/useAnalysis';
 import { ReportView } from '../ReportView';
+import { ErrorBoundary } from '../ErrorBoundary';
 
-const cardVariants = {
+
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" } }
 };
@@ -117,7 +119,7 @@ export function Hero() {
 
           {/* Main Headline */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-bricolage text-[var(--color-text-primary)] leading-[1.1] mb-8 tracking-tight">
-            Your Website's SEO,<br />
+            Your Website&apos;s SEO,<br />
             Laid Bare in<br />
             30 Seconds.
           </h1>
@@ -172,7 +174,9 @@ export function Hero() {
 
       {/* Render the full report just below the hero when ready */}
       {status === 'complete' && result && (
-        <ReportView result={result} url={url} onReset={handleReset} />
+        <ErrorBoundary>
+          <ReportView result={result} url={url} onReset={handleReset} />
+        </ErrorBoundary>
       )}
     </>
   );

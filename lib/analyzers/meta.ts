@@ -8,7 +8,7 @@ import * as cheerio from 'cheerio';
  * @param $ - The loaded Cheerio instance representing the parsed HTML.
  * @returns A MetaAnalysis object containing the extracted data and structured audit items.
  */
-export function analyzeMeta($: cheerio.CheerioAPI): { meta: MetaAnalysis, auditItems: AuditItem[] } {
+export function analyzeMeta($: ReturnType<typeof cheerio.load>): { meta: MetaAnalysis, auditItems: AuditItem[] } {
   const auditItems: AuditItem[] = [];
   const meta: MetaAnalysis = {};
 

@@ -12,26 +12,26 @@ export interface MetaAnalysis {
   description?: string;
   ogImage?: string;
   twitterCard?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface HeadingAnalysis {
   h1Count?: number;
   hierarchyValid?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ImageAnalysis {
   totalImages?: number;
   missingAlt?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LinkAnalysis {
   internal?: number;
   external?: number;
   broken?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TechnicalAnalysis {
@@ -39,13 +39,13 @@ export interface TechnicalAnalysis {
   robotsTxt?: boolean;
   sitemap?: boolean;
   canonical?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ContentAnalysis {
   wordCount?: number;
   readability?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PerformanceAnalysis {
@@ -53,7 +53,7 @@ export interface PerformanceAnalysis {
   lcp?: string;
   fid?: string;
   cls?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ScoreBreakdown {

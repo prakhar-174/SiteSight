@@ -13,7 +13,7 @@ function validateUrl(url: string): URL {
       throw new Error('URL must start with http:// or https://');
     }
     return parsedUrl;
-  } catch (error) {
+  } catch (_e) {
     throw new Error('Invalid URL format. Please provide a valid URL like https://example.com');
   }
 }
@@ -67,9 +67,9 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
          }
        }
     }
-  } catch (error: any) {
-    if (error.message === "This site's robots.txt disallows automated crawling.") {
-      throw error; // Re-throw the explicit block error
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === "This site's robots.txt disallows automated crawling.") {
+      throw err; // Re-throw the explicit block error
     }
     // Ignore 404 or other errors for robots.txt (it's optional)
   }
@@ -82,8 +82,15 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
       },
       timeout: 10000, // 10 second timeout
-      maxRedirects: 5
+      maxRedirects: 5,
+      responseType: 'text', // Prevent automatic JSON parsing
+      maxContentLength: 5 * 1024 * 1024 // Reject payloads larger than 5MB
     });
+
+    const contentType = String(response.headers['content-type'] || '');
+    if (!contentType.includes('text/html')) {
+      throw new Error('Target URL does not return HTML content.');
+    }
 
     // In Node.js environment, axios uses response.request.res.responseUrl for final URL
     const finalUrl = response.request?.res?.responseUrl || url;
@@ -94,25 +101,26 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
       statusCode: response.status,
       redirected: finalUrl !== url
     };
-  } catch (error: any) {
-    if (error.response) {
-      if (error.response.status === 404) {
-        throw new Error('Page not found (404). Please check the URL.');
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      if (err.response) {
+        if (err.response.status === 404) {
+          throw new Error('Page not found (404). Please check the URL.');
+        }
+        if (err.response.status === 403) {
+          throw new Error('Access denied (403). The site might be blocking bots.');
+        }
+        throw new Error(`Server responded with error code: ${err.response.status}`);
+      } else if (err.request) {
+        if (err.code === 'ECONNREFUSED') {
+          throw new Error('Connection refused. The server might be down.');
+        }
+        if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+          throw new Error('Request timed out after 10 seconds.');
+        }
+        throw new Error('Could not reach the server. Please check the URL.');
       }
-      if (error.response.status === 403) {
-        throw new Error('Access denied (403). The site might be blocking bots.');
-      }
-      throw new Error(`Server responded with error code: ${error.response.status}`);
-    } else if (error.request) {
-      if (error.code === 'ECONNREFUSED') {
-        throw new Error('Connection refused. The server might be down.');
-      }
-      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-        throw new Error('Request timed out after 10 seconds.');
-      }
-      throw new Error('Could not reach the server. Please check the URL.');
-    } else {
-      throw new Error('An unexpected error occurred while fetching the page.');
     }
+    throw new Error('An unexpected error occurred while fetching the page.');
   }
 }

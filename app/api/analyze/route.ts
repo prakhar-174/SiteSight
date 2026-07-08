@@ -12,19 +12,41 @@ import { getPageSpeedData } from '../../../lib/pageSpeed';
 import { calculateScores } from '../../../lib/scorer';
 import * as cheerio from 'cheerio';
 
-/**
- * POST /api/analyze
- * Next.js App Router Route Handler.
- * Initiates an SEO analysis job asynchronously and returns a job ID immediately.
- */
+// Simple in-memory rate limiting.
+// Note: In production, an in-memory store is not scalable across multiple serverless functions.
+// Production would use Upstash Ratelimit (Redis) or similar.
+const rateLimit = new Map<string, { count: number, resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const now = Date.now();
+    const rateData = rateLimit.get(ip) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+
+    if (now > rateData.resetAt) {
+      rateData.count = 0;
+      rateData.resetAt = now + RATE_LIMIT_WINDOW_MS;
+    }
+
+    if (rateData.count >= RATE_LIMIT_MAX) {
+      return NextResponse.json({ error: "Too many requests. Please wait before analyzing again." }, { status: 429 });
+    }
+
+    rateData.count++;
+    rateLimit.set(ip, rateData);
+
     const body = await request.json();
     const { url } = body;
 
     // Validate URL existence and format
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       return NextResponse.json({ error: 'URL is required.' }, { status: 400 });
+    }
+
+    if (url.length > 2048) {
+      return NextResponse.json({ error: 'URL exceeds maximum length of 2048 characters.' }, { status: 400 });
     }
 
     let parsedUrl: URL;
@@ -33,8 +55,20 @@ export async function POST(request: Request) {
       if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
         throw new Error();
       }
-    } catch {
-      return NextResponse.json({ error: 'Invalid URL format. Please provide a full URL including http:// or https://' }, { status: 400 });
+
+      const hostname = parsedUrl.hostname;
+      
+      // SSRF Prevention: Reject localhost and private IP ranges.
+      // Server-Side Request Forgery (SSRF) occurs when a web application is coaxed into making a server-side HTTP request
+      // to an arbitrary domain or internal network. We prevent this so attackers cannot scan internal network infrastructure.
+      const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0';
+      const isPrivateIP = /^(10\.\d+\.\d+\.\d+|172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+|192\.168\.\d+\.\d+)$/.test(hostname);
+
+      if (isLocalhost || isPrivateIP) {
+        return NextResponse.json({ error: 'Internal and private network URLs are not allowed.' }, { status: 400 });
+      }
+    } catch (_e) {
+      return NextResponse.json({ error: 'Invalid URL format. Please provide a full public URL including http:// or https://' }, { status: 400 });
     }
 
     // Generate unique job ID and initialize job
@@ -52,7 +86,7 @@ export async function POST(request: Request) {
 
     // Return 202 Accepted immediately with the job ID
     return NextResponse.json({ jobId, status: 'processing' }, { status: 202 });
-  } catch (error) {
+  } catch (_e) {
     return NextResponse.json({ error: 'Failed to process request.' }, { status: 500 });
   }
 }

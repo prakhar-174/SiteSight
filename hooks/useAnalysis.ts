@@ -70,22 +70,24 @@ export function useAnalysis() {
             setState({ status: 'error', result: null, error: job.error || 'Analysis failed.' });
           }
           // If status is 'processing', do nothing and let the interval tick again
-        } catch (pollError: any) {
+        } catch (pollErr: unknown) {
           clearPolling();
+          const msg = axios.isAxiosError(pollErr) ? pollErr.response?.data?.error : null;
           setState({ 
             status: 'error', 
             result: null, 
-            error: pollError.response?.data?.error || 'Lost connection to server while polling.' 
+            error: msg || 'Lost connection to server while polling.' 
           });
         }
       }, 1500);
 
-    } catch (initError: any) {
+    } catch (initErr: unknown) {
       clearPolling();
+      const msg = axios.isAxiosError(initErr) ? initErr.response?.data?.error : null;
       setState({ 
         status: 'error', 
         result: null, 
-        error: initError.response?.data?.error || 'Failed to start analysis. Please check the URL and try again.' 
+        error: msg || 'Failed to start analysis. Please check the URL and try again.' 
       });
     }
   }, [clearPolling]);

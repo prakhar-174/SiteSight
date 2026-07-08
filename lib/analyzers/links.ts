@@ -8,7 +8,7 @@ import * as cheerio from 'cheerio';
  * @param origin - The base origin URL (e.g. https://example.com) to differentiate internal vs external.
  * @returns A LinkAnalysis object containing link counts and structured audit items.
  */
-export function analyzeLinks($: cheerio.CheerioAPI, origin: string): { links: LinkAnalysis, auditItems: AuditItem[] } {
+export function analyzeLinks($: ReturnType<typeof cheerio.load>, origin: string): { links: LinkAnalysis, auditItems: AuditItem[] } {
   const auditItems: AuditItem[] = [];
   const links: LinkAnalysis = {
     internal: 0,

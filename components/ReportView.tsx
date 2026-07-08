@@ -18,10 +18,9 @@ interface ReportViewProps {
 function Section({ title, score, items, defaultExpanded = true }: { title: string, score: number, items: AuditItemType[], defaultExpanded?: boolean }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  // Auto-collapse on mobile initially
   useEffect(() => {
     if (window.innerWidth < 768) {
-      setExpanded(false);
+      setTimeout(() => setExpanded(false), 0);
     }
   }, []);
 
