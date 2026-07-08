@@ -15,11 +15,10 @@ import { getJob } from '../../../../lib/jobStore';
  */
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  // Awaiting params for Next.js 15 forward compatibility, but it works directly in 14 too.
-  // We use context.params.id as the synchronous fallback to remain safe for Next.js 14
-  const { id } = context.params;
+  const params = await context.params;
+  const { id } = params;
 
   if (!id) {
     return NextResponse.json({ error: 'Job ID is required.' }, { status: 400 });
